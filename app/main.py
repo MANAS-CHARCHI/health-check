@@ -20,11 +20,6 @@ app = FastAPI(
 # We keep the code modular by moving route logic to app/api/endpoints.py.
 app.include_router(endpoints.router, prefix="/api", tags=["Claims"])
 
-# 4. Root Health Check
-@app.get("/", tags=["Health"])
-async def health_check():
-    return {"status": "online", "message": "Claim Processing Service is running"}
-
 if __name__ == "__main__":
     # To run locally using 'uv run python app/main.py'
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

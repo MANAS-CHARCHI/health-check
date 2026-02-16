@@ -44,3 +44,7 @@ async def process(claim_id: str, background_tasks: BackgroundTasks, file: Upload
     # Trigger background processing
     background_tasks.add_task(run_extraction_pipeline, claim_id, process_id, db)
     return {"process_id": process_id}
+
+@router.get("/process/health/{claim_id}")
+async def health_check(claim_id: str):
+    return {"status": "online", "message": f"Claim Processing Service is running for claim {claim_id}"}
