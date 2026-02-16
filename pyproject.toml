@@ -1,0 +1,16 @@
+[project]
+name = "healthcheck"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.42.49",
+    "fastapi>=0.129.0",
+    "langchain-aws>=1.2.5",
+    "langgraph>=1.0.8",
+    "pydantic>=2.12.5",
+    "python-multipart>=0.0.22",
+    "sqlalchemy>=2.0.46",
+    "uvicorn>=0.40.0",
+]
