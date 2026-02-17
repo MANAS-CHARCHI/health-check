@@ -29,7 +29,7 @@ async def run_extraction_pipeline(claim_id: str, process_id: str, db: Session):
     record.status = "COMPLETED"
     record.s3_output_json_key = output_key
     db.commit()
-
+# added ti test TODO: need to remove
 @router.post("/process/{claim_id}")
 async def process(claim_id: str, background_tasks: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(database.get_db)):
     process_id = uuid.uuid4().hex
