@@ -1,18 +1,28 @@
 import boto3
 import asyncio
 from typing import List
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
-# Configure your AWS region
-REGION = "us-east-1"
-textract = boto3.client("textract", region_name=REGION)
+REGION = os.getenv("S3_REGION_NAME")
+textract = boto3.client("textract", region_name="us-east-1")
 
-async def get_full_text(s3_key: str, bucket_name: str = "my-claims-bucket") -> List[str]:
+
+async def get_full_text(s3_key: str, bucket_name: str = os.getenv("S3_BUCKET_NAME")) -> List[str]:
     """
-    Triggers Textract, polls for completion, and returns a list where 
-    each element is the full text of a single page.
+    Triggers Textract, polls for completion, and returns a list where each element is the full text.
     """
-    # 1. Start the Asynchronous Job
-    # We use StartDocumentAnalysis to support Tables/Forms in the future
+    s3_test = boto3.client("s3", region_name=REGION)
+    s3_key = s3_key.lstrip('/')
+    print(f"DEBUG: Attempting to find Bucket: {bucket_name} | Key: {s3_key} | Region: {REGION}")
+    try:
+        meta = s3_test.head_object(Bucket=bucket_name, Key=s3_key)
+        print(f"✅ S3 SUCCESS: File size is {meta['ContentLength']} bytes")
+    except Exception as e:
+        print(f"❌ S3 ERROR: {str(e)}")
+        # This will tell you if it's '404 Not Found' or '403 Forbidden'
+        raise e
     response = textract.start_document_analysis(
         DocumentLocation={
             'S3Object': {
@@ -24,8 +34,7 @@ async def get_full_text(s3_key: str, bucket_name: str = "my-claims-bucket") -> L
     )
     job_id = response["JobId"]
 
-    # 2. Poll for Completion
-    # We loop every 2 seconds to check if AWS is finished
+    # Loop every 2 seconds to check if AWS is finished
     while True:
         status_resp = textract.get_document_analysis(JobId=job_id)
         status = status_resp["JobStatus"]
@@ -37,9 +46,7 @@ async def get_full_text(s3_key: str, bucket_name: str = "my-claims-bucket") -> L
         
         await asyncio.sleep(2)
 
-    # 3. Retrieve All Results (Handling Pagination)
     # AWS returns results in chunks of 1000 blocks. We must use NextToken
-    # to "stitch" the full document together.
     pages_map = {}
     next_token = None
     

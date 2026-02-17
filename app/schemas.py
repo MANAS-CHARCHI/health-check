@@ -15,12 +15,14 @@ class DischargeSchema(BaseModel):
     diagnosis: str
     admission_date: str
     discharge_date: str
+    physician_details: Dict[str, str]
     summary: str
 
 class IDSchema(BaseModel):
     patient_name: str
     id_number: str
     dob: str
+    policy_details: Optional[Dict[str, str]] = None
 
 # --- Orchestration Schema ---
 class DocClassification(BaseModel):
