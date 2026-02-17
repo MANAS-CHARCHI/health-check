@@ -6,8 +6,13 @@ services:
     build:
       context: .
     env_file: .env
+    environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_DEFAULT_REGION
     volumes:
       - .:/usr/src/app/
+      - /usr/src/app/.venv/
     container_name: health-check-backend
     command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
     restart: always
