@@ -23,20 +23,19 @@ async def get_full_text(s3_key: str, bucket_name: str = os.getenv("S3_BUCKET_NAM
         print(f"❌ S3 ERROR: {str(e)}")
         # This will tell you if it's '404 Not Found' or '403 Forbidden'
         raise e
-    response = textract.start_document_analysis(
+    response = textract.start_document_text_detection(
         DocumentLocation={
             'S3Object': {
                 'Bucket': bucket_name,
                 'Name': s3_key
             }
-        },
-        FeatureTypes=['TABLES', 'FORMS'] 
+        }
     )
     job_id = response["JobId"]
 
     # Loop every 2 seconds to check if AWS is finished
     while True:
-        status_resp = textract.get_document_analysis(JobId=job_id)
+        status_resp = textract.get_document_text_detection(JobId=job_id)
         status = status_resp["JobStatus"]
         
         if status == "SUCCEEDED":
@@ -55,12 +54,12 @@ async def get_full_text(s3_key: str, bucket_name: str = os.getenv("S3_BUCKET_NAM
         if next_token:
             kwargs["NextToken"] = next_token
         
-        result_page = textract.get_document_analysis(**kwargs)
+        result_page = textract.get_document_text_detection(**kwargs)
         
         # Process Blocks
         for block in result_page.get("Blocks", []):
             if block["BlockType"] == "LINE":
-                page_num = block.get("Page", 1) - 1 # 0-indexed
+                page_num = block.get("Page", 1) - 1
                 text = block.get("Text", "")
                 
                 if page_num not in pages_map:
